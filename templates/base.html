@@ -1,0 +1,11 @@
+<html>
+    <head>
+        <title>Bookreview</title>
+    </head>
+    <body>
+        <h1>Bookreview</h1>
+        {% block content %}{% endblock content %}
+    </body>
+    <p><a href="{% url 'ticket' %}">Créer un ticket</a></p>
+    <p><a href="{% url 'logout' %}">Se déconnecter</a></p>
+</html>
