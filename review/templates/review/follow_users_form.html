@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% if message %}
+        <h2><p>{{message}} </p></h2>
+    {% endif %}
+    {% if follows %}
+        <p>vous suivez:</p>
+        {% for follow in follows %}
+            <p>{{ follow.followed_user }} {{follow.followed_user.id}} ne plus suivre : <a href="{% url 'del_follower' follow.followed_user.id %}">Cliquer ici</a></p>
+        {% endfor %}
+        <p>vous suivez {{count}} utilisateurs </p>
+    {% endif %}
+    <h2>Suivre des utilisateurs</h2>
+    <form method="post">
+        {{ form.as_p }}
+        {% csrf_token %}
+        <button type="submit" >Confirmer</button>
+    </form>
+{% endblock content %}

@@ -4,8 +4,10 @@
     </head>
     <body>
         <h1>Bookreview</h1>
+        <p>Bonjour {{ user.username }} </p>
         {% block content %}{% endblock content %}
     </body>
     <p><a href="{% url 'ticket' %}">Créer un ticket</a></p>
     <p><a href="{% url 'logout' %}">Se déconnecter</a></p>
+    <p><a href="{% url 'follow_users' %}">Suivre des utilisateurs</a></p>
 </html>
