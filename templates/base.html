@@ -1,13 +1,23 @@
+{% load static %}
 <html>
     <head>
-        <title>Bookreview</title>
+        <title>BookReview</title>
+        <link rel="stylesheet" href="{% static 'app.css' %}">
     </head>
     <body>
-        <h1>Bookreview</h1>
-        <p>Bonjour {{ user.username }} </p>
-        {% block content %}{% endblock content %}
+        <div class="sidebar">
+            <h1>Bookreview</h1>
+            {% if user.is_authenticated %}
+                <p><a href="{% url 'home' %}">Allez sur la page d'accueuil</a></p>
+                <p><a href="{% url 'ticket' %}">Créer un ticket</a></p>
+                <p><a href="{% url 'ticket_review' %}">Créer un ticket et une critique</a></p>
+                <p><a href="{% url 'logout' %}">Se déconnecter</a></p>
+                <p><a href="{% url 'follow_users' %}">Suivre des utilisateurs</a></p>
+            {% endif %}
+        </div>
+        <div class="main">
+            <p><h4>Bonjour {{ user.username }} </h4></p>
+            {% block content %}{% endblock content %}
+        </div>
     </body>
-    <p><a href="{% url 'ticket' %}">Créer un ticket</a></p>
-    <p><a href="{% url 'logout' %}">Se déconnecter</a></p>
-    <p><a href="{% url 'follow_users' %}">Suivre des utilisateurs</a></p>
 </html>

@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'review/home/styles.css' %}">
 "HOME"
 <p><h3>mes tickets</h3></p>
 {% for ticket in my_tickets %}
@@ -9,18 +11,57 @@
     {{ ticket.date_created}}
     {% if ticket.image %}
     <img src="{{ ticket.image.url }}">
+
     {% endif %}
       
     <p><a href="{% url 'edit_ticket' ticket.id %}">Modifier le ticket</a></p>
     <p><a href="{% url 'review' ticket.id %}">Faire une critique du ticket</a></p>
     {% endfor %}
-  <p><h3>mes critiques</h3></p> 
-  {% for review in my_reviews %}
+<p><h3>mes critiques</h3></p> 
+{% for review in my_reviews %}
   <p> {{review.headline}} </p>
   <p> {{review.body}} </p>
   <p> {{review.rating}} </p>
   <p> {{review.author}} </p>
-  <p> moyenne : {{average}} </p>
+  <p> {% for _ in review.average.full %}
+    <img class="heart" src="{% static 'images/heart.svg'%}">
+  {% endfor %}
+  {% for _ in review.average.half %}
+    <img class="heart" src="{% static 'images/heart-half-outline.svg'%}">
+  {% endfor %}
+  {% for _ in review.average.empty %}
+    <img class="heart" src="{% static 'images/heart-outline.svg'%}">
+  {% endfor %}
+  moyenne : {{review.average.average}} </p>
+    <p> note moyenne : {{average}}/5 </p>
   <p><a href="{% url 'edit_review' review.id %}">Modifier la critique</a></p>
+{% endfor %}
+<p><h2>Les tickets de mes abonnements:</h2></p>
+{% for follow_ticket in follow_tickets %}
+  {{ follow_ticket.title }}
+  {{ follow_ticket.author }}
+  {{ follow_ticket.description}}
+  {{ follow_ticket.date_created}}
+  {% if follow_ticket.image %}
+    <img src="{{ follow_ticket.image.url }}">
+  {% endif %}
+  <p><a href="{% url 'review' follow_ticket.id %}">Faire une critique du ticket</a></p>
+{% endfor %}  
+<p><h3>les critiques de mes tickets</h3></p> 
+{% for review in reviews_my_tickets %}
+  <p> {{review.headline}} </p>
+  <p> {{review.body}} </p>
+  <p> {{review.rating}} </p>
+  <p> {{review.author}} </p>
+  <p> {% for _ in review.average.full %}
+      <img class="heart" src="{% static 'images/heart.svg'%}">
+    {% endfor %}
+    {% for _ in review.average.half %}
+      <img class="heart" src="{% static 'images/heart-half-outline.svg'%}">
+    {% endfor %}
+    {% for _ in review.average.empty %}
+      <img class="heart" src="{% static 'images/heart-outline.svg'%}">
+    {% endfor %}
+   note moyenne : {{review.average.average}}/5 </p>
 {% endfor %}
 {% endblock content %}

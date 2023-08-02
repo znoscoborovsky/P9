@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
+<p>Vous ête en train de poster en réponse à:</p>
+<p>{{ ticket.author }} a demandé une critique                      {{ ticket.date_created}}</p>
+<p>{{ ticket.title }} </p>
+<p>{{ ticket.description }}</p>
+{% if ticket.image %}
+<img src="{{ ticket.image.url }}">
+{% endif %}
 <h2>Créer une critique</h2>
 <form method="post" enctype="multipart/form-data">
     {{ review.as_p }}

@@ -9,21 +9,46 @@ from django.shortcuts import get_object_or_404, redirect, render
 from . import forms, models
 User = get_user_model()
 
+def make_average(last_rating, reviews):
+    average=0
+    if reviews:
+        for review in reviews:
+            average += review.rating
+    average = average + last_rating
+    average = average/(len(reviews)+1)
+
+def lovers(average):
+    full, half = divmod(average, 1)
+    if 0.75 > half >= 0.25:
+        half = 1
+    elif half >= 0.75:
+        full += 1
+        half = 0
+    else:
+        half = 0
+    full = int(full)
+    empty = 5 - full - half
+    return [1]*full, [1]*half, [1]*empty
+
 @login_required
 def home(request):
+    
     tickets = models.Ticket.objects.all()
     my_tickets = tickets.filter(author=request.user)
     reviews = models.Review.objects.all()
     my_reviews = reviews.filter(author=request.user)
-    average = 0
-    if reviews:
-        for review in reviews:
-            average += review.rating
-        average = average/len(reviews)
+    sub_list = []
+    follows = models.UserFollows.objects.filter(user=request.user)
+    for follow in follows:
+        sub_list.append(follow.followed_user)
+    follow_tickets = tickets.filter(author__in=sub_list)
+    reviews_my_tickets = reviews.filter(ticket__author=request.user)
+
     context = {
+        "follow_tickets":follow_tickets,
         "my_tickets":my_tickets,
         "my_reviews":my_reviews,
-        "average":average,
+        "reviews_my_tickets":reviews_my_tickets
         }
 
     return render(request, "review/home.html", context=context)
@@ -64,6 +89,8 @@ def edit_ticket(request, ticket_id):
 
 def create_review(request, ticket_id):
     ticket = get_object_or_404(models.Ticket, id=ticket_id)
+    if models.Review.objects.filter(author=request.user).filter(ticket_id=ticket_id):
+        return redirect('no_more_review')
     review = forms.ReviewForm()
     if request.method == 'POST':
         review = forms.ReviewForm(request.POST,request.FILES)
@@ -71,9 +98,23 @@ def create_review(request, ticket_id):
             review.save(commit=False)
             review.instance.author = request.user
             review.instance.ticket = ticket
+            review.instance.average = {}
+            #Django compte déjà cette critique même si elle n'est pas sauvegardée dans la bd
+            if len(models.Review.objects.filter(ticket_id=ticket_id)) > 1:
+                review.instance.average["average"] = make_average(review.instance.rating, models.Review.objects.filter(ticket_id=ticket_id))
+            else: 
+                review.instance.average["average"] = review.instance.rating
+            average = review.instance.average["average"]
+            review.instance.average["full"], review.instance.average["half"], review.instance.average["empty"] = lovers(average)
             review.save()
             return redirect('home')
-    return render(request,'review/create_review.html',context={'review':review})
+    context={'review':review,
+             'ticket':ticket
+             }
+    return render(request,'review/create_review.html', context=context)
+
+def no_more_critic(request):
+    return render(request,'review/no_more_critic.html', context={})
 
 def edit_review(request, review_id):
     review = get_object_or_404(models.Review, id=review_id)
@@ -83,6 +124,14 @@ def edit_review(request, review_id):
         if "edit_review" in request.POST:
             edit_form=forms.ReviewForm(request.POST, instance=review)  
             if edit_form.is_valid():
+                edit_form.instance.average = {}
+                #Django compte déjà cette critique même si elle n'est pas sauvegardée dans la bd
+                if len(models.Review.objects.filter(review_id=review_id)) > 1:
+                    edit_form.instance.average["average"] = make_average(edit_form.instance.rating, models.Review.objects.filter(review_id=review_id))
+                else: 
+                    edit_form.instance.average["average"] =edit_form.instance.rating
+                average = edit_form.instance.average["average"]
+                edit_form.instance.average["full"], edit_form.instance.average["half"], edit_form.instance.average["empty"] = lovers(average)
                 edit_form.save()
                 return redirect("home")
         if "delete_review" in request.POST:
@@ -95,7 +144,24 @@ def edit_review(request, review_id):
     return render(request, 'review/edit_review.html', context=context)
 
 def create_ticket_and_review(request):
-    pass
+    ticket = forms.TicketForm()
+    review = forms.ReviewForm()
+    if request.method == 'POST':
+        review = forms.ReviewForm(request.POST,request.FILES)
+        ticket = forms.TicketForm(request.POST,request.FILES)
+        if all([review.is_valid(), ticket.is_valid()]):
+            ticket.save(commit=False)
+            ticket.instance.author = request.user
+            ticket.save()            
+            review.instance.author = request.user
+            review.instance.ticket = ticket.instance
+            review.save()
+            return redirect("home")
+    context = {
+        'ticket': ticket,
+        'review': review,
+    }
+    return render(request, 'review/edit_ticket_and_review.html', context=context)
 
 @login_required
 def follow_users(request):
@@ -124,3 +190,5 @@ def follow_users(request):
 def del_follower(request,  follow_id):
     models.UserFollows.objects.filter(user_id=request.user.id, followed_user_id=follow_id).delete()
     return redirect('follow_users')
+
+

@@ -42,8 +42,10 @@ urlpatterns = [
     path('signup/', authentication.views.signup_page, name='signup'),
     path("ticket/", review.views.create_ticket, name='ticket'),
     path("ticket/<int:ticket_id>/review/", review.views.create_review, name='review'),
+    path("no_more_review/", review.views.no_more_critic, name='no_more_review'),
     path('ticket/<int:ticket_id>/edit/', review.views.edit_ticket, name='edit_ticket'),
     path('review/<int:review_id>/edit/', review.views.edit_review, name='edit_review'),
+    path('ticket_and_review/', review.views.create_ticket_and_review, name='ticket_review'),
     path('follow-users/', review.views.follow_users, name='follow_users'),
     path('<int:follow_id>/', review.views.del_follower, name='del_follower')
 ]
