@@ -9,6 +9,7 @@
             <h1>Bookreview</h1>
             {% if user.is_authenticated %}
                 <p><a href="{% url 'home' %}">Allez sur la page d'accueuil</a></p>
+                <p><a href="{% url 'my_posts' %}">Mes posts</a></p>
                 <p><a href="{% url 'ticket' %}">Créer un ticket</a></p>
                 <p><a href="{% url 'ticket_review' %}">Créer un ticket et une critique</a></p>
                 <p><a href="{% url 'logout' %}">Se déconnecter</a></p>

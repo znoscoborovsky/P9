@@ -3,19 +3,17 @@ from . import models
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, permission_required
 from django.forms import formset_factory, ValidationError
-from django.db.models import Q
+from django.db.models import Q , CharField, Value
 from django.shortcuts import get_object_or_404, redirect, render
 
 from . import forms, models
 User = get_user_model()
 
-def make_average(last_rating, reviews):
+def make_average(reviews):
     average=0
-    if reviews:
-        for review in reviews:
-            average += review.rating
-    average = average + last_rating
-    average = average/(len(reviews)+1)
+    for review in reviews:
+        average += review.rating
+    return average/len(reviews)
 
 def lovers(average):
     full, half = divmod(average, 1)
@@ -30,25 +28,60 @@ def lovers(average):
     empty = 5 - full - half
     return [1]*full, [1]*half, [1]*empty
 
+def update_average(reviews):
+    for review in reviews:
+        review.average["average"] = make_average(reviews)
+        review.average["full"], review.average["half"], review.average["empty"] = lovers(review.average["average"])
+        review.save()
+
 @login_required
-def home(request):
-    
+def my_posts(request):
     tickets = models.Ticket.objects.all()
     my_tickets = tickets.filter(author=request.user)
     reviews = models.Review.objects.all()
     my_reviews = reviews.filter(author=request.user)
+    my_reviews = my_reviews.annotate(content_type=Value('REVIEW', CharField()))
+    my_tickets = my_tickets.annotate(content_type=Value('TICKET', CharField()))
+    my_posts = sorted(chain(my_reviews, my_tickets),
+                      key=lambda instance: instance.date_created,
+                      reverse=True
+                      )    
+    context = {
+        "my_posts":my_posts,
+        }
+
+    return render(request, "review/my_posts.html", context=context)
+
+@login_required
+def home(request):
+    
+    tickets = models.Ticket.objects.all()
+    tickets = tickets.exclude(author=request.user)
+    reviews = models.Review.objects.all()  
+    reviews = reviews.exclude(author=request.user)
     sub_list = []
     follows = models.UserFollows.objects.filter(user=request.user)
     for follow in follows:
         sub_list.append(follow.followed_user)
     follow_tickets = tickets.filter(author__in=sub_list)
+    follow_reviews = reviews.filter(author__in=sub_list)
     reviews_my_tickets = reviews.filter(ticket__author=request.user)
-
+    follow_tickets = follow_tickets.annotate(content_type=Value('TICKET', CharField()))
+    follow_reviews = follow_reviews.annotate(content_type=Value('REVIEW', CharField()))
+    reviews_my_tickets = reviews_my_tickets.annotate(content_type=Value('REVIEW', CharField()))
+    my_flux = sorted(chain(follow_tickets, follow_reviews, reviews_my_tickets ),
+                      key=lambda instance: instance.date_created,
+                      reverse=True
+                      )
+    other_tickets = tickets.exclude(author__in=sub_list).annotate(content_type=Value('TICKET', CharField()))
+    other_reviews = reviews.exclude(author__in=sub_list).annotate(content_type=Value('REVIEW', CharField()))
+    others = sorted(chain(other_tickets, other_reviews ),
+                      key=lambda instance: instance.date_created,
+                      reverse=True
+                      )
     context = {
-        "follow_tickets":follow_tickets,
-        "my_tickets":my_tickets,
-        "my_reviews":my_reviews,
-        "reviews_my_tickets":reviews_my_tickets
+        "my_flux":my_flux,
+        "others":others
         }
 
     return render(request, "review/home.html", context=context)
@@ -99,14 +132,8 @@ def create_review(request, ticket_id):
             review.instance.author = request.user
             review.instance.ticket = ticket
             review.instance.average = {}
-            #Django compte déjà cette critique même si elle n'est pas sauvegardée dans la bd
-            if len(models.Review.objects.filter(ticket_id=ticket_id)) > 1:
-                review.instance.average["average"] = make_average(review.instance.rating, models.Review.objects.filter(ticket_id=ticket_id))
-            else: 
-                review.instance.average["average"] = review.instance.rating
-            average = review.instance.average["average"]
-            review.instance.average["full"], review.instance.average["half"], review.instance.average["empty"] = lovers(average)
             review.save()
+            update_average(models.Review.objects.filter(ticket_id=ticket_id))
             return redirect('home')
     context={'review':review,
              'ticket':ticket
@@ -125,14 +152,8 @@ def edit_review(request, review_id):
             edit_form=forms.ReviewForm(request.POST, instance=review)  
             if edit_form.is_valid():
                 edit_form.instance.average = {}
-                #Django compte déjà cette critique même si elle n'est pas sauvegardée dans la bd
-                if len(models.Review.objects.filter(review_id=review_id)) > 1:
-                    edit_form.instance.average["average"] = make_average(edit_form.instance.rating, models.Review.objects.filter(review_id=review_id))
-                else: 
-                    edit_form.instance.average["average"] =edit_form.instance.rating
-                average = edit_form.instance.average["average"]
-                edit_form.instance.average["full"], edit_form.instance.average["half"], edit_form.instance.average["empty"] = lovers(average)
                 edit_form.save()
+                update_average(models.Review.objects.filter(ticket_id=review.ticket_id))
                 return redirect("home")
         if "delete_review" in request.POST:
             review.delete()
@@ -152,10 +173,12 @@ def create_ticket_and_review(request):
         if all([review.is_valid(), ticket.is_valid()]):
             ticket.save(commit=False)
             ticket.instance.author = request.user
-            ticket.save()            
+            ticket.save()     
             review.instance.author = request.user
             review.instance.ticket = ticket.instance
+            review.instance.average = {}
             review.save()
+            update_average(models.Review.objects.filter(ticket_id=review.instance.ticket_id))
             return redirect("home")
     context = {
         'ticket': ticket,

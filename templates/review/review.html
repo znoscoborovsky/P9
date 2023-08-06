@@ -1,0 +1,18 @@
+{% load static %}
+<p> {{review.headline}} </p>
+<p> {{review.body}} </p>
+<p>note de {{review.author}} {{review.rating}}/5 </p>
+<p> {{ request.user }} </p>
+<p> {% for _ in review.average.full %}
+<img class="heart" src="{% static 'images/heart.svg'%}">
+{% endfor %}
+{% for _ in review.average.half %}
+<img class="heart" src="{% static 'images/heart-half-outline.svg'%}">
+{% endfor %}
+{% for _ in review.average.empty %}
+<img class="heart" src="{% static 'images/heart-outline.svg'%}">
+{% endfor %}
+note moyenne : {{review.average.average}}/5 </p>
+{% if review.author == request.user %}
+    <p><a href="{% url 'edit_review' review.id %}">Modifier la critique</a></p>
+{% endif %}
