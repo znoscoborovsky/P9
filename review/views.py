@@ -1,9 +1,8 @@
 from itertools import chain
 from . import models
 from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import login_required, permission_required
-from django.forms import formset_factory, ValidationError
-from django.db.models import Q , CharField, Value
+from django.contrib.auth.decorators import login_required
+from django.db.models import CharField, Value
 from django.shortcuts import get_object_or_404, redirect, render
 
 from . import forms, models
@@ -28,14 +27,20 @@ def lovers(average):
     empty = 5 - full - half
     return [1]*full, [1]*half, [1]*empty
 
+# see comments in field average in model
 def update_average(reviews):
     for review in reviews:
-        review.average["average"] = make_average(reviews)
-        review.average["full"], review.average["half"], review.average["empty"] = lovers(review.average["average"])
-        review.save()
+        review.hearts["average"]["average"] = make_average(reviews)
+        review.hearts["average"]["full"], \
+        review.hearts["average"]["half"], \
+        review.hearts["average"]["empty"] = lovers(review.hearts["average"]["average"])
+        review.hearts["author_rating"]["full"], \
+        review.hearts["author_rating"]["half"], \
+        review.hearts["author_rating"]["empty"] = lovers(review.hearts["author_rating"]["rating"])
+        review.save()        
 
 @login_required
-def my_posts(request):
+def home(request):
     tickets = models.Ticket.objects.all()
     my_tickets = tickets.filter(author=request.user)
     reviews = models.Review.objects.all()
@@ -45,45 +50,36 @@ def my_posts(request):
     my_posts = sorted(chain(my_reviews, my_tickets),
                       key=lambda instance: instance.date_created,
                       reverse=True
-                      )    
-    context = {
-        "my_posts":my_posts,
-        }
-
-    return render(request, "review/my_posts.html", context=context)
-
-@login_required
-def home(request):
-    
-    tickets = models.Ticket.objects.all()
+                    )
     tickets = tickets.exclude(author=request.user)
-    reviews = models.Review.objects.all()  
     reviews = reviews.exclude(author=request.user)
     sub_list = []
     follows = models.UserFollows.objects.filter(user=request.user)
     for follow in follows:
         sub_list.append(follow.followed_user)
-    follow_tickets = tickets.filter(author__in=sub_list)
-    follow_reviews = reviews.filter(author__in=sub_list)
+    follow_tickets = tickets.filter(author__in=sub_list).exclude(author=request.user)
+    follow_reviews = reviews.filter(author__in=sub_list).exclude(ticket__author=request.user)
     reviews_my_tickets = reviews.filter(ticket__author=request.user)
     follow_tickets = follow_tickets.annotate(content_type=Value('TICKET', CharField()))
     follow_reviews = follow_reviews.annotate(content_type=Value('REVIEW', CharField()))
     reviews_my_tickets = reviews_my_tickets.annotate(content_type=Value('REVIEW', CharField()))
-    my_flux = sorted(chain(follow_tickets, follow_reviews, reviews_my_tickets ),
+    reviews_my_tickets = reviews_my_tickets.order_by("-date_created")
+    follows = sorted(chain(follow_tickets, follow_reviews),
                       key=lambda instance: instance.date_created,
                       reverse=True
                       )
-    other_tickets = tickets.exclude(author__in=sub_list).annotate(content_type=Value('TICKET', CharField()))
-    other_reviews = reviews.exclude(author__in=sub_list).annotate(content_type=Value('REVIEW', CharField()))
+    other_tickets = tickets.exclude(author__in=sub_list).exclude(author=request.user).annotate(content_type=Value('TICKET', CharField()))
+    other_reviews = reviews.exclude(author__in=sub_list).exclude(ticket__author=request.user).annotate(content_type=Value('REVIEW', CharField()))
     others = sorted(chain(other_tickets, other_reviews ),
                       key=lambda instance: instance.date_created,
                       reverse=True
                       )
     context = {
-        "my_flux":my_flux,
+        "my_posts":my_posts,
+        "follows":follows,
+        "reviews_my_tickets":reviews_my_tickets,
         "others":others
         }
-
     return render(request, "review/home.html", context=context)
 
 @login_required
@@ -120,6 +116,7 @@ def edit_ticket(request, ticket_id):
     }
     return render(request, 'review/edit_ticket.html', context=context)
 
+@login_required
 def create_review(request, ticket_id):
     ticket = get_object_or_404(models.Ticket, id=ticket_id)
     if models.Review.objects.filter(author=request.user).filter(ticket_id=ticket_id):
@@ -131,7 +128,10 @@ def create_review(request, ticket_id):
             review.save(commit=False)
             review.instance.author = request.user
             review.instance.ticket = ticket
-            review.instance.average = {}
+            review.instance.hearts = {}
+            review.instance.hearts["average"] = {}
+            review.instance.hearts["author_rating"] = {}
+            review.instance.hearts["author_rating"]["rating"] = review.instance.rating
             review.save()
             update_average(models.Review.objects.filter(ticket_id=ticket_id))
             return redirect('home')
@@ -140,9 +140,11 @@ def create_review(request, ticket_id):
              }
     return render(request,'review/create_review.html', context=context)
 
+@login_required
 def no_more_critic(request):
     return render(request,'review/no_more_critic.html', context={})
 
+@login_required
 def edit_review(request, review_id):
     review = get_object_or_404(models.Review, id=review_id)
     delete_form = forms.DeleteReview()
@@ -152,6 +154,10 @@ def edit_review(request, review_id):
             edit_form=forms.ReviewForm(request.POST, instance=review)  
             if edit_form.is_valid():
                 edit_form.instance.average = {}
+                edit_form.instance.hearts = {}
+                edit_form.instance.hearts["average"] = {}
+                edit_form.instance.hearts["author_rating"] = {}
+                edit_form.instance.hearts["author_rating"]["rating"] = edit_form.instance.rating
                 edit_form.save()
                 update_average(models.Review.objects.filter(ticket_id=review.ticket_id))
                 return redirect("home")
@@ -164,6 +170,7 @@ def edit_review(request, review_id):
     }
     return render(request, 'review/edit_review.html', context=context)
 
+@login_required
 def create_ticket_and_review(request):
     ticket = forms.TicketForm()
     review = forms.ReviewForm()
@@ -176,14 +183,17 @@ def create_ticket_and_review(request):
             ticket.save()     
             review.instance.author = request.user
             review.instance.ticket = ticket.instance
-            review.instance.average = {}
+            review.instance.hearts = {}
+            review.instance.hearts["average"] = {}
+            review.instance.hearts["author_rating"] = {}
+            review.instance.hearts["author_rating"]["rating"] = review.instance.rating
             review.save()
             update_average(models.Review.objects.filter(ticket_id=review.instance.ticket_id))
             return redirect("home")
     context = {
         'ticket': ticket,
         'review': review,
-    }
+        }
     return render(request, 'review/edit_ticket_and_review.html', context=context)
 
 @login_required
@@ -193,23 +203,27 @@ def follow_users(request):
     follows = models.UserFollows.objects.filter(user=request.user)
     count = len(follows)
     if request.method == 'POST':
-        #if request.POST in follows:
-        
         form = forms.FollowerForm(request.POST)
-        #raise ValidationError(f"Vous suivez déjà les publications de {request.POST['followed_user']}")
-        
         if form.is_valid():
-            #form.cleaned_data['followed_user'] 
             try: 
                 form.save(commit=False)
                 form.instance.user = request.user
                 form.save()
-                return redirect('home')
+                return redirect('follow_users')
             except:
                 message = f"vous suivez déjà {form.cleaned_data['followed_user']}"
-                return render(request, 'review/follow_users_form.html', context={'form': form, 'follows':follows, 'count':count, "message":message})
-    return render(request, 'review/follow_users_form.html', context={'form': form, 'follows':follows, 'count':count, "message":message})
+                return render(request, 'review/follow_users_form.html', context={'form': form, 
+                                                                                 'follows':follows, 
+                                                                                 'count':count, 
+                                                                                 "message":message
+                                                                                })
+    return render(request, 'review/follow_users_form.html', context={'form': form,
+                                                                     'follows':follows, 
+                                                                     'count':count, 
+                                                                     "message":message
+                                                                     })
 
+@login_required
 def del_follower(request,  follow_id):
     models.UserFollows.objects.filter(user_id=request.user.id, followed_user_id=follow_id).delete()
     return redirect('follow_users')

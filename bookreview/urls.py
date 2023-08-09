@@ -26,7 +26,6 @@ from django.contrib.auth.views import (
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("home/", review.views.home, name="home"), 
-    path("mes posts/", review.views.my_posts, name="my_posts"), 
     path('', LoginView.as_view(
         template_name='authentication/login.html',
         redirect_authenticated_user=True),

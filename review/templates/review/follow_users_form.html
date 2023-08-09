@@ -6,14 +6,16 @@
     {% if follows %}
         <p>vous suivez:</p>
         {% for follow in follows %}
-            <p>{{ follow.followed_user }} {{follow.followed_user.id}} ne plus suivre : <a href="{% url 'del_follower' follow.followed_user.id %}">Cliquer ici</a></p>
+            <p><strong>{{ follow.followed_user }}</strong> ne plus suivre : <button><a href="{% url 'del_follower' follow.followed_user.id %}">Cliquer ici</a></button></p>
         {% endfor %}
         <p>vous suivez {{count}} utilisateurs </p>
     {% endif %}
-    <h2>Suivre des utilisateurs</h2>
+    <h3>Sélectionner un utilisateur</h3>
     <form method="post">
         {{ form.as_p }}
         {% csrf_token %}
         <button type="submit" >Confirmer</button>
     </form>
 {% endblock content %}
+
+<button></button>

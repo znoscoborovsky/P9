@@ -1,22 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
-{% load static %}
-<link rel="stylesheet" href="{% static 'review/home/styles.css' %}">
-"HOME"
-<p><h3>Mon flux:</h3></p>
-{% for my_f in my_flux %}
-{% if my_f.content_type == 'TICKET' %}
-{% include 'ticket/ticket.html' with ticket=my_f %}
-{% elif my_f.content_type == 'REVIEW' %}
-{% include 'review/review.html' with review=my_f %}
-{% endif %}
-{% endfor %}  
-<p><h3>les autres posts du site:</h3></p>
-{% for other in others %}
-{% if other.content_type == 'TICKET' %}
-{% include 'ticket/ticket.html' with ticket=other %}
-{% elif other.content_type == 'REVIEW' %}
-{% include 'review/review.html' with review=other %}
-{% endif %}
-{% endfor %} 
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    "HOME"
+    <p><h3>mes posts</h3></p>
+    {% for post in my_posts %}
+    {% if post.content_type == 'TICKET' %}
+        {% include 'ticket/ticket.html' with ticket=post %}
+    {% elif post.content_type == 'REVIEW' %}
+        {% include 'review/review.html' with review=post %}
+    {% endif %}
+    {% endfor %} 
+    <p><h3>Les réponses à mes tickets</h3></p>
+    {% for reviews_my_ticket in reviews_my_tickets %}
+        {% if reviews_my_ticket.content_type == 'TICKET' %}
+            {% include 'ticket/ticket.html' with ticket=reviews_my_ticket %}
+        {% elif reviews_my_ticket.content_type == 'REVIEW' %}
+            {% include 'review/review.html' with review=reviews_my_ticket %}
+        {% endif %}
+    {% endfor %}  
+    <p><h3>Mes abonnements</h3></p>
+    {% for follow in follows %}
+        {% if follow.content_type == 'TICKET' %}
+            {% include 'ticket/ticket.html' with ticket=follow %}
+        {% elif follow.content_type == 'REVIEW' %}
+            {% include 'review/review.html' with review=follow %}
+        {% endif %}
+    {% endfor %}    
+    <p><h3>les autres posts du site:</h3></p>
+    {% for other in others %}
+        {% if other.content_type == 'TICKET' %}
+            {% include 'ticket/ticket.html' with ticket=other %}
+        {% elif other.content_type == 'REVIEW' %}
+            {% include 'review/review.html' with review=other %}
+        {% endif %}
+    {% endfor %} 
 {% endblock content %}

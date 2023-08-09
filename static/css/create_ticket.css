@@ -1,0 +1,20 @@
+body{
+    background-color: blueviolet;
+}
+
+h3{
+    text-align: center;
+}
+
+.title{
+    width : 500px;
+}
+
+#ticket_label{
+    height: 50px;
+    width: 500px;
+}
+#ticket_input{
+    height: 50px;
+    width: 500px;
+}

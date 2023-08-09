@@ -1,18 +1,48 @@
 {% load static %}
-<p> {{review.headline}} </p>
-<p> {{review.body}} </p>
-<p>note de {{review.author}} {{review.rating}}/5 </p>
-<p> {{ request.user }} </p>
-<p> {% for _ in review.average.full %}
-<img class="heart" src="{% static 'images/heart.svg'%}">
-{% endfor %}
-{% for _ in review.average.half %}
-<img class="heart" src="{% static 'images/heart-half-outline.svg'%}">
-{% endfor %}
-{% for _ in review.average.empty %}
-<img class="heart" src="{% static 'images/heart-outline.svg'%}">
-{% endfor %}
-note moyenne : {{review.average.average}}/5 </p>
-{% if review.author == request.user %}
-    <p><a href="{% url 'edit_review' review.id %}">Modifier la critique</a></p>
-{% endif %}
+<link rel="stylesheet" href="{% static 'css/review.css' %}">
+<div id="block_review">
+    {% if review.author == request.user %}
+        <p>Vous avez publié une critique</p>
+    {% else %}
+        <P>{{review.author}} a publié une critique</P>
+    {% endif %}
+    <p><h5> {{ review.date_created }} </h5></p>
+    <p> {{review.headline}} - ma note:
+ 
+        {% for _ in review.hearts.author_rating.full %}
+        <img class="mini_heart" src="{% static 'images/heart.svg'%}">
+        {% endfor %}
+        {% for _ in review.hearts.author_rating.half %}
+        <img class="mini_heart" src="{% static 'images/heart-half-outline.svg'%}">
+        {% endfor %}
+        {% for _ in review.hearts.author_rating.empty %}
+        <img class="mini_heart" src="{% static 'images/heart-outline.svg'%}">
+        {% endfor %}
+        {{review.hearts.author_rating.rating}}/5 
+    </p>
+    <p> {{review.body}} </p>
+    <p> note moyenne : 
+        {% for _ in review.hearts.average.full %}
+        <img class="heart" src="{% static 'images/heart.svg'%}">
+        {% endfor %}
+        {% for _ in review.hearts.average.half %}
+        <img class="heart" src="{% static 'images/heart-half-outline.svg'%}">
+        {% endfor %}
+        {% for _ in review.hearts.average.empty %}
+        <img class="heart" src="{% static 'images/heart-outline.svg'%}">
+        {% endfor %}
+        {{review.hearts.average.average}}/5
+        <div id="block_ticket">
+            <p>Ticket - {{ review.ticket.author }} </p>
+            <h5> {{ review.ticket.date_created }} </h5>
+            <p>{{ review.ticket.title }}</p>
+            <p>{% if review.ticket.image %}
+                    <img src="{{ review.ticket.image.url }}">
+                {% endif %}
+            </p>
+        </div> 
+    </p>
+    {% if review.author == request.user %}
+        <p><button><a href="{% url 'edit_review' review.id %}">Modifier la critique</a></button></p>
+    {% endif %}
+</div>
