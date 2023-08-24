@@ -1,0 +1,60 @@
+body{
+    background-color: rgb(208, 184, 231);
+}
+
+h3#critique {
+    text-align: center;
+}
+
+div#ticket {
+    padding: 5px;
+    border: 1px rgb(0, 0, 0) solid;   
+}
+
+div#ticket_description {
+    padding: 10px;
+    border: 1px rgb(0, 0, 0) solid;
+    width: 70%;
+    margin-left: 15%;
+}
+
+div.main {
+    border: 1px rgb(0, 0, 0) solid;  
+}
+
+h5#date {
+    text-align: right;
+}
+
+h3#title {
+    text-align: center;
+}
+
+div#critique_form {
+    border: 1px rgb(0, 0, 0) solid;
+    margin-top: 5px;
+    padding: 5px;
+}
+
+h3#form_title {
+    text-align: center;
+}
+
+input#id_headline {
+    border: 1px rgb(0, 0, 0) solid;
+    width: 100%;
+}
+
+textarea#id_body {
+    border: 1px rgb(0, 0, 0) solid;
+    width: 100%;
+}
+
+div#id_rating {
+    display: flex;
+}
+
+button#submit {
+    display: block;    
+    margin-left: 90%;
+}

@@ -1,21 +1,35 @@
 {% extends 'base.html' %}
 {% block content %}
-    {% if message %}
-        <h2><p>{{message}} </p></h2>
-    {% endif %}
-    {% if follows %}
-        <p>vous suivez:</p>
-        {% for follow in follows %}
-            <p><strong>{{ follow.followed_user }}</strong> ne plus suivre : <button><a href="{% url 'del_follower' follow.followed_user.id %}">Cliquer ici</a></button></p>
-        {% endfor %}
-        <p>vous suivez {{count}} utilisateurs </p>
-    {% endif %}
-    <h3>Sélectionner un utilisateur</h3>
-    <form method="post">
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/follow.css' %}">
+{% if message %}
+    <h2 id="message"><p>{{message}} </p></h2>
+{% endif %}
+<div id="follow_block">
+    <p><h3>Suivre d'aures utilisateurs</h3></p>
+    <form id="form" method="post">
         {{ form.as_p }}
         {% csrf_token %}
-        <button type="submit" >Confirmer</button>
+        <button type="submit" id="submit">Envoyer</button>
     </form>
-{% endblock content %}
+    <p><h3>Abonnements</h3></p>
+    {% if follows %}
+        {% for follow in follows %}
+            <div id="abonnements">
+                <p id="new"><strong>{{ follow.followed_user }}</strong></p>
+                <a id="cancel" href="{% url 'del_follower' follow.followed_user.id %}">Désobonner</a>
+            </div>
+        {% endfor %}
+        <p>vous suivez {{count}} utilisateurs </p>
+    {% else %}
+        <p> Vous ne suivez personne </p>
+    {% endif %}
+    <p><h3>Abonnés</h3></p>
+    {% if follows_me %}
+        {% for follow_me in follows_me %}
+            <p id="follow_me"><strong>{{ follow_me }}</strong></p>
+        {% endfor %}
+    {% endif %}
+</div>
 
-<button></button>
+{% endblock content %}

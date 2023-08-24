@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/create_review.css' %}">
+
 <h2>Modifier la critique</h2>
 <form method="post" enctype="multipart/form-data">
     {{ edit_form.as_p }}

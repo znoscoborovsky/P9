@@ -39,7 +39,7 @@ class Review(models.Model):
                         full:value,   --> number of full hearts for average
                         empty:value,  --> number of empty hearts for average
                         half:value    --> number of half hearts for average
-                        }
+                        },
                author_rating:{
                               rating:value  --> rating of the author
                               full:value,   --> number of full hearts for author rating

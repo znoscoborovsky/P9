@@ -201,6 +201,10 @@ def follow_users(request):
     message = ""
     form = forms.FollowerForm()
     follows = models.UserFollows.objects.filter(user=request.user)
+    follows_me = []
+    for somebody in models.UserFollows.objects.all():
+        if somebody.followed_user == request.user:
+            follows_me.append(somebody.user)
     count = len(follows)
     if request.method == 'POST':
         form = forms.FollowerForm(request.POST)
@@ -215,12 +219,14 @@ def follow_users(request):
                 return render(request, 'review/follow_users_form.html', context={'form': form, 
                                                                                  'follows':follows, 
                                                                                  'count':count, 
-                                                                                 "message":message
+                                                                                 "message":message,
+                                                                                 "follows_me":follows_me
                                                                                 })
     return render(request, 'review/follow_users_form.html', context={'form': form,
                                                                      'follows':follows, 
                                                                      'count':count, 
-                                                                     "message":message
+                                                                     "message":message,
+                                                                     "follows_me":follows_me
                                                                      })
 
 @login_required

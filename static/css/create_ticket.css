@@ -1,20 +1,29 @@
 body{
-    background-color: blueviolet;
+    background-color: rgb(208, 184, 231);
 }
 
-h3{
+div.main {
+    display: block;
+    border: 1px rgb(0, 0, 0) solid;  
+}
+
+h3#title {
     text-align: center;
 }
 
-.title{
-    width : 500px;
+input#id_title {
+    display: block;
+    border: 1px rgb(0, 0, 0) solid;
+    width: 100%;
 }
 
-#ticket_label{
-    height: 50px;
-    width: 500px;
+textarea#id_description {
+    display: block;
+    border: 1px rgb(0, 0, 0) solid;
+    width: 100%;
 }
-#ticket_input{
-    height: 50px;
-    width: 500px;
+
+button#submit {
+    display: block;    
+    margin-left: 90%;
 }

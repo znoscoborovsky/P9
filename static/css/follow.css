@@ -1,0 +1,51 @@
+body{
+    background-color: rgb(208, 184, 231);
+}
+
+#form{
+    display: flex;
+}
+
+#submit {
+    margin-left: 5%;
+}
+
+div#follow_block {
+    padding: 5px;
+    border: 1px rgb(0, 0, 0) solid;   
+}
+
+h3 {
+    text-align: center;
+}
+
+div#abonnements {
+    display: flex;
+    margin: 0px;
+    padding: 0px;
+}
+
+p#new {
+    border: 1px rgb(0, 0, 0) solid;
+    width:80%;
+    height: 40px;
+    margin: 0px;
+    padding: 10px;
+    
+}
+
+a#cancel {
+    border: 1px rgb(0, 0, 0) solid;
+    width:20%;
+    height: 40px;
+    margin: 0px;
+    padding: 10px;
+}
+
+p#follow_me {
+    border: 1px rgb(0, 0, 0) solid;
+    width:90%;
+    height: 40px;
+    margin: 0px;
+    padding: 10px;
+}

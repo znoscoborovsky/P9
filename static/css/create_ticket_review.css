@@ -1,0 +1,44 @@
+body{
+    background-color: rgb(208, 184, 231);
+}
+
+div#ticket {
+    display: block;
+    border: 1px rgb(0, 0, 0) solid;
+    padding: 10px  
+}
+
+div#critique {
+    display: block;
+    border: 1px rgb(0, 0, 0) solid;
+    padding: 10px   
+}
+
+h3 {
+    text-align: center;
+}
+
+textarea#id_description {
+    display: block;
+    border: 1px rgb(0, 0, 0) solid;
+    width: 100%;
+}
+
+input#id_headline {
+    border: 1px rgb(0, 0, 0) solid;
+    width: 100%;
+}
+
+textarea#id_body {
+    border: 1px rgb(0, 0, 0) solid;
+    width: 100%;
+}
+
+div#id_rating {
+    display: flex;
+}
+
+button#submit {
+    display: block;    
+    margin-left: 90%;
+}

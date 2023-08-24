@@ -1,16 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
-<p>Vous ête en train de poster en réponse à:</p>
-<p>{{ ticket.author }} a demandé une critique                      {{ ticket.date_created}}</p>
-<p>{{ ticket.title }} </p>
-<p>{{ ticket.description }}</p>
-{% if ticket.image %}
-<img src="{{ ticket.image.url }}">
-{% endif %}
-<h2>Créer une critique</h2>
-<form method="post" enctype="multipart/form-data">
-    {{ review.as_p }}
-    {% csrf_token %}
-    <button type="submit" >Publier</button>
-</form>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/create_review.css' %}">
+    <p><h3 id="critique">Créer une critique</h3></p>
+    <div id="ticket">
+        <p>Vous ête en train de poster en réponse à:</p>
+        <div id="ticket_description">
+            <p><h5 id="date">{{ ticket.date_created}}</h5></p>
+            <p>{{ ticket.author }} a demandé une critique</p>
+            <p>{{ ticket.title }}</p>
+            <p>{{ ticket.description }}</p>
+            {% if ticket.image %}
+                <img src="{{ ticket.image.url }}">
+            {% endif %}
+        </div>
+    </div>
+    <div id="critique_form">
+        <h3 id="form_title">Critique</h3>
+        <form method="post" enctype="multipart/form-data">
+            {{ review.as_p }}
+            {% csrf_token %}
+            <button type="submit" id="submit" >Publier</button>
+        </form>
+    </div>
 {% endblock content %}

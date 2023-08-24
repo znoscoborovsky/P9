@@ -1,12 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Créer un ticket </h2>
-<form method="post" enctype="multipart/form-data">
-    {{ ticket.as_p }}
-    {% csrf_token %}
-    <h2>Créer la critique du ticket</h2>
-    {{ review.as_p }}
-    {% csrf_token %}
-    <button type="submit" >Publier</button>
-</form>
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/create_ticket_review.css' %}">
+<div id="ticket">
+    <h3>Créer un ticket </h3>
+    <form method="post" enctype="multipart/form-data">
+        {{ ticket.as_p }}
+        {% csrf_token %}
+</div>
+    <div id="critique">
+        <h3>Créer la critique du ticket</h3>
+        {{ review.as_p }}
+        {% csrf_token %}
+        <button type="submit" id="submit">Publier</button>
+    </form>
+</div>
 {% endblock content %}

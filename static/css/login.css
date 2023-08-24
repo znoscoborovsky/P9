@@ -1,0 +1,18 @@
+body{
+    background-color: rgb(208, 184, 231);
+}
+
+div#main_block {
+    display: flex;
+
+}
+
+div#block_left {
+    text-align: center;
+    width: 40%;
+}
+
+div#block_right {
+    text-align: center;
+    width: 40%;
+}
