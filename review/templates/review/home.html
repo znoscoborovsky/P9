@@ -2,7 +2,7 @@
 {% block content %}
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
-    "HOME"
+    <h2 id="home"><strong>HOME</strong></h2>
     <p><h3>mes posts</h3></p>
     {% for post in my_posts %}
     {% if post.content_type == 'TICKET' %}

@@ -4,21 +4,7 @@
     <link rel="stylesheet" href="{% static 'css/create_ticket.css' %}">
     <h3 id="title">Créer un ticket</h3>
     <form method="post" enctype="multipart/form-data">
-        <div class="title">
-            <p>{{ ticket.title.errors }}</p>
-            <p id="ticket_label">{{ ticket.title.label_tag }}</p>
-            <p id="ticket_input">{{ ticket.title }}</p>
-        </div>
-        <div class="description">
-            <p>{{ ticket.description.errors }}</p>
-            <p>{{ ticket.description.label_tag }}</p>
-            <p>{{ ticket.description }}</p>
-        </div>
-        <div class="image">
-            <p>{{ ticket.image.errors }}</p>
-            <p>{{ ticket.image.label_tag }}</p>
-            <p>{{ ticket.image }}</p>
-        </div>
+        {{ ticket.as_p }}
         {% csrf_token %}
         <button type="submit" id="submit" >Publier</button>
     </form>

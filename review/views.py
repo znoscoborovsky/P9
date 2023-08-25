@@ -4,8 +4,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models import CharField, Value
 from django.shortcuts import get_object_or_404, redirect, render
-
 from . import forms, models
+
 User = get_user_model()
 
 def make_average(reviews):
@@ -234,4 +234,9 @@ def del_follower(request,  follow_id):
     models.UserFollows.objects.filter(user_id=request.user.id, followed_user_id=follow_id).delete()
     return redirect('follow_users')
 
+def handler404(request, exception):
+    return render(request, 'errors/404.html', status=404)
+
+def handler500(request):
+    return render(request, 'errors/500.html', status=500)
 

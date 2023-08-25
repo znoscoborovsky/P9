@@ -49,6 +49,11 @@ urlpatterns = [
     path('follow-users/', review.views.follow_users, name='follow_users'),
     path('<int:follow_id>/', review.views.del_follower, name='del_follower')
 ]
+
 if settings.DEBUG:
     urlpatterns += static(
         settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    
+# handling the 404 and 500 errors
+handler404 = review.views.handler404
+handler500 = review.views.handler500
